@@ -1,0 +1,198 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  Edit Post | PostTrack
+{% endblock %}
+
+{% block css %}
+  {{ block.super }} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <style>
+    .image-preview-wrapper {
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      background-color: #f8f9fa;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #image-preview-container {
+      /* This is now visible by default because we have a current image */
+      display: block; 
+      max-width: 100%;
+    }
+    #image-preview {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Edit Post: {{ post.title }}</h4>
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'posts:post_list' %}">Posts</a></li>
+                <li class="breadcrumb-item active">Edit Post</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        
+        <div class="col-lg-7">
+          <div class="card h-100">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Update Post Details</h4>
+
+              <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                  <label for="{{ form.assigned_client.id_for_label }}" class="form-label">{{ form.assigned_client.label }}</label>
+                  {{ form.assigned_client }}
+                </div>
+
+                <div class="mb-3">
+                  <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                  {{ form.title }}
+                </div>
+                
+                <div class="mb-3">
+                  <label for="{{ form.caption.id_for_label }}" class="form-label">{{ form.caption.label }}</label>
+                  {{ form.caption }}
+                </div>
+
+                <div class="mb-3">
+                  <label for="{{ form.scheduled_datetime.id_for_label }}" class="form-label">{{ form.scheduled_datetime.label }}</label>
+                  {{ form.scheduled_datetime }}
+                </div>
+
+                <div class="mb-3">
+                  <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
+                  <p class="text-muted small">Uploading a new image will replace the current one.</p>
+                  {{ form.image }} </div>
+                
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary w-md">Update & Resubmit</button>
+                  <a href="{% url 'core:dashboard' %}" class="btn btn-light w-md">Cancel</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Image Preview</h4>
+              <div class="image-preview-wrapper">
+                <p id="preview-text" class="text-muted" 
+                   {% if post.image %}style="display: none;"{% endif %}>
+                   <i class="bx bx-image-add display-4 text-muted"></i><br>
+                   Select an image to see a preview
+                </p>
+                <div id="image-preview-container" 
+                     {% if not post.image %}style="display: none;"{% endif %}>
+                  <img src="{% if post.image %}{{ post.image.url }}{% else %}#{% endif %}" id="image-preview" alt="Image preview" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Feedback History</h4>
+                <div data-simplebar style="max-height: 400px;">
+                    <ul class="verti-timeline list-unstyled">
+                        {% for fb in feedback_history %}
+                        <li class="event-list">
+                            <div class="event-timeline-dot">
+                                <i class="bx bxs-comment-error 
+                                    {% if post.status == 'REJECTED' and forloop.first %}text-danger{% else %}text-muted{% endif %}"></i>
+                            </div>
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <div>
+                                        <h5 class="font-size-14">{{ fb.user.username }} <small class="text-muted">{{ fb.created_at|timesince }} ago</small></h5>
+                                        <p class="text-muted">{{ fb.comment }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="event-list">
+                            <p class="text-muted">No feedback history for this post.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block page_script %}
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- Modern Date-time Picker ---
+        flatpickr('[data-toggle="flatpickr"]', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "F j, Y at h:i K",
+            minuteIncrement: 1,
+        });
+
+        // --- Image Preview ---
+        const imageInput = document.getElementById('id_image_input');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('image-preview');
+        const previewPlaceholderIcon = document.querySelector('.image-preview-wrapper i');
+        const previewPlaceholderText = document.querySelector('.image-preview-wrapper h6');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.setAttribute('src', e.target.result);
+                        previewContainer.style.display = 'block';
+                        if (previewPlaceholderIcon) previewPlaceholderIcon.style.display = 'none';
+                        if (previewPlaceholderText) previewPlaceholderText.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+                // If no file is selected (e.g., user hits "cancel"), 
+                // we'll just keep showing the original post image.
+            });
+        }
+    });
+  </script>
+{% endblock %}

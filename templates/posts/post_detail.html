@@ -1,0 +1,111 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  {{ post.title }} | PostTrack
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+
+      <!-- Breadcrumb -->
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Post Details</h4>
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'posts:post_list' %}">All Posts</a></li>
+                <li class="breadcrumb-item active">{{ post.title|truncatechars:30 }}</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post Card -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">{{ post.title }}</h4>
+            {% if request.user.role == 'SUPER_ADMIN' %}
+                <div class="alert alert-info mb-3">
+                    <i class="bx bx-lock-alt"></i> You have view-only access as a Super Admin.
+                </div>
+            {% endif %}
+            <span class="badge
+              {% if post.status == 'DRAFT' %} bg-secondary
+              {% elif post.status == 'PENDING' %} bg-warning text-dark
+              {% elif post.status == 'APPROVED' %} bg-success
+              {% elif post.status == 'REJECTED' %} bg-danger
+              {% elif post.status == 'PUBLISHED' %} bg-primary
+              {% else %} bg-dark
+              {% endif %}
+            ">
+              {{ post.get_status_display }}
+            </span>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Client:</strong> {{ post.assigned_client.company_name }}</p>
+              <p><strong>Created By:</strong> {{ post.created_by.username }}</p>
+              <p><strong>Created On:</strong> {{ post.created_at|date:"M d, Y H:i" }}</p>
+              <p><strong>Last Updated:</strong> {{ post.updated_at|timesince }} ago</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Scheduled Date:</strong> 
+                {% if post.scheduled_datetime %}
+                  {{ post.scheduled_datetime|date:"M d, Y H:i" }}
+                {% else %}
+                  <span class="text-muted">Not scheduled</span>
+                {% endif %}
+              </p>
+              <p><strong>Status:</strong> {{ post.get_status_display }}</p>
+              <p><strong>Total Feedback:</strong> {{ feedbacks.count }}</p>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Post Content -->
+          <div class="mb-4">
+            <h5>Caption</h5>
+            <p class="text-muted">{{ post.caption }}</p>
+          </div>
+
+          <div class="text-center mb-4">
+            <img src="{{ post.image.url }}" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 500px; border: 1px solid #ddd;" alt="Post image">
+          </div>
+
+          <!-- Feedback Section -->
+          <h5 class="mb-3">Client Feedback</h5>
+          {% if feedbacks %}
+            <ul class="list-group">
+              {% for fb in feedbacks %}
+                <li class="list-group-item">
+                  <strong>{{ fb.user.username }}</strong>
+                  <span class="text-muted small">({{ fb.created_at|date:"M d, Y H:i" }})</span>
+                  <p class="mb-0 mt-1">“{{ fb.comment }}”</p>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted fst-italic">No feedback available for this post.</p>
+          {% endif %}
+
+          <div class="text-end mt-4">
+            <a href="{% url 'posts:post_list' %}" class="btn btn-light waves-effect">Back to List</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

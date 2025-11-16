@@ -1,0 +1,95 @@
+{% comment %} templates/core/sidebar.html {% endcomment %}
+
+{% comment %} 
+  This `with` tag makes it easier to check the current URL name.
+  We will use the 'url_name' variable in our `if` tags.
+{% endcomment %}
+{% with request.resolver_match.url_name as url_name %}
+<div class="vertical-menu">
+  <div data-simplebar class="h-100">
+    <div id="sidebar-menu">
+      <ul class="metismenu list-unstyled" id="side-menu">
+        <li class="menu-title" key="t-menu">Menu</li>
+
+        {% if request.user.role == 'SUPER_ADMIN' or request.user.role == 'ADMIN' %}
+          {% comment %} 
+            We add 'mm-active' to the <li> and 'active' to the <a>
+            if the current URL name is 'dashboard'.
+          {% endcomment %}
+          <li class="{% if url_name == 'dashboard' %}mm-active{% endif %}">
+            <a href="{% url 'core:dashboard' %}" class="waves-effect {% if url_name == 'dashboard' %}active{% endif %}">
+              <i class="bx bx-home-circle"></i>
+              <span key="t-dashboards">Dashboard</span>
+            </a>
+          </li>
+        {% endif %}
+
+        <li class="menu-title" key="t-apps">Management</li>
+
+        {% if request.user.role == 'ADMIN' %}
+          <li>
+            {% comment %} This is a placeholder link for the Calendar module {% endcomment %}
+            <a href="{% url 'core:admin_calendar' %}" class="waves-effect">
+              <i class="bx bx-calendar"></i>
+              <span key="t-calendar">Calendar</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if request.user.role == 'SUPER_ADMIN' %}
+          <li class="{% if url_name == 'client_assignments' %}mm-active{% endif %}">
+            <a href="{% url 'core:client_assignments' %}" class="waves-effect {% if url_name == 'client_assignments' %}active{% endif %}">
+              <i class="bx bx-user-pin"></i>
+              <span key="t-client-assign">Client Assign</span>
+            </a>
+          </li>
+        {% endif %}
+        
+        {% if request.user.role == 'ADMIN' or request.user.role == 'SUPER_ADMIN' %}
+          {% comment %} 
+            This is the logic for a dropdown menu.
+            We check if the url_name is IN our list of post-related URLs.
+          {% endcomment %}
+          {% with post_urls='posts:post_list posts:create_post posts:edit_post' %}
+          <li class="{% if url_name in post_urls %}mm-active{% endif %}">
+            <a href="javascript: void(0);" class="has-arrow waves-effect">
+              <i class="bx bx-briefcase-alt-2"></i>
+              <span key="t-posts">Posts</span>
+            </a>
+            <ul class="sub-menu" aria-expanded="false">
+              <li>
+                <a href="{% url 'posts:post_list' %}" class="{% if url_name == 'post_list' %}active{% endif %}" key="t-post-list">All Posts</a>
+              </li>
+              {% if request.user.role == 'SUPER_ADMIN' or request.user.role == 'ADMIN' %}
+              <li>
+                <a href="{% url 'posts:admin_request_list' %}" class="{% if url_name == 'admin_request_list' %}active{% endif %}" key="t-create-new">Requested Posts</a>
+              </li>
+              {% endif %}
+            </ul>
+          </li>
+          {% endwith %}
+        {% endif %}
+
+        {% if request.user.role == 'SUPER_ADMIN' or request.user.role == 'ADMIN' %}
+          {% with report_urls='report_rejection report_activity' %}
+          <li class="{% if url_name in report_urls %}mm-active{% endif %}">
+            <a href="javascript: void(0);" class="has-arrow waves-effect">
+              <i class="bx bx-bar-chart-alt-2"></i>
+              <span key="t-reports">Reports</span>
+            </a>
+            <ul class="sub-menu" aria-expanded="false">
+              <li>
+                <a href="{% url 'core:report_rejection' %}" class="{% if url_name == 'report_rejection' %}active{% endif %}" key="t-rejection-report">Rejection Report</a>
+              </li>
+              <li>
+                <a href="{% url 'core:report_activity' %}" class="{% if url_name == 'report_activity' %}active{% endif %}" key="t-activity-report">Client Activity</a>
+              </li>
+            </ul>
+          </li>
+          {% endwith %}
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endwith %}

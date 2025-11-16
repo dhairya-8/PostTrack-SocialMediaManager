@@ -1,0 +1,194 @@
+{% extends 'core/base_client.html' %}
+{% load static %}
+
+{% block title %}
+  {{ post.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-body p-3">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-0">
+            <h4 class="font-size-22 fw-bold">Post Details</h4>
+
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item">
+                  <a href="{% url 'core:client_dashboard' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                  <a href="{% url 'core:client_feed' %}">Feed</a>
+                </li>
+                <li class="breadcrumb-item active">{{ post.title|truncatewords:3 }}</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="row">
+            <div class="col-lg-7">
+              <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded w-100" style="max-height: 600px; object-fit: cover;" />
+            </div>
+
+            <div class="col-lg-5">
+              <div class="post-detail-header mb-3">
+                <img src="https://ui-avatars.com/api/?name={{ post.assigned_client.company_name|first }}&background=4f46e5&color=fff&size=128" alt="profile" />
+                <h5>{{ post.assigned_client.company_name|lower }}</h5>
+              </div>
+              <div class="post-detail-caption">
+                <h5 class="font-size-16 fw-bold mb-2">{{ post.title }}</h5>
+                <p class="text-muted">{{ post.caption|linebreaksbr }}</p>
+              </div>
+              <hr />
+
+              <div class="mb-4">
+                {% if user_rating %}
+                  <h5>Your Rating</h5>
+                  <div class="d-flex align-items-center mb-2">
+                    {% for i in "12345" %}
+                      <i class="bx bxs-star font-size-18 {% if i|add:0 <= user_rating.score %}
+                          
+                          text-warning
+
+                        {% else %}
+                          
+                          text-muted
+
+                        {% endif %}">
+
+                      </i>
+                    {% endfor %}
+                    <span class="ms-2 fw-bold">({{ user_rating.score }}/5)</span>
+                  </div>
+                  <p class="fst-italic text-muted mb-0">"{{ user_rating.comment|default:'No comment left.' }}"</p>
+                {% elif post.status == 'PUBLISHED' %}
+                  <h5>Rate This Post</h5>
+                  <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                      <label class="form-label">Your Rating</label>
+                      <div class="js-star-rating mb-2">
+                        <i class="bx bxs-star" data-value="1"></i>
+                        <i class="bx bxs-star" data-value="2"></i>
+                        <i class="bx bxs-star" data-value="3"></i>
+                        <i class="bx bxs-star" data-value="4"></i>
+                        <i class="bx bxs-star" data-value="5"></i>
+                      </div>
+                      {{ rating_form.score }}
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="{{ rating_form.comment.id_for_label }}" class="form-label">{{ rating_form.comment.label }}</label>
+                      {{ rating_form.comment }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Rating</button>
+                  </form>
+                {% else %}
+                  <p class="text-muted">This post cannot be rated until it is published.</p>
+                {% endif %}
+              </div>
+              <hr />
+
+              <div class="post-detail-comments">
+                <h5 class="mb-3">All Ratings ({{ ratings.count }})</h5>
+                <div class="comment-feed" data-simplebar>
+                  {% for r in ratings %}
+                    <div class="comment-item">
+                      <div class="comment-item-avatar">{{ r.user.username|first|upper }}</div>
+                      <div class="comment-item-body">
+                        <strong>{{ r.user.username }}</strong>
+                        <span class="ms-2">
+                          {% for i in "12345" %}
+                            <i class="bx bxs-star font-size-12 {% if i|add:0 <= r.score %}
+                                text-warning
+                              {% else %}
+                                text-muted
+                              {% endif %}">
+
+                            </i>
+                          {% endfor %}
+                        </span>
+                        <p class="mt-1">"{{ r.comment|default:'No comment left' }}"</p>
+                      </div>
+                    </div>
+                  {% empty %}
+                    <p class="text-muted">No ratings yet.</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="{% static 'admin/assets/libs/simplebar/simplebar.min.js' %}"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Init simplebar
+      document.querySelectorAll('[data-simplebar]').forEach((el) => {
+        new SimpleBar(el)
+      })
+    
+      // --- Star Rating Logic ---
+      const starRatingContainer = document.querySelector('.js-star-rating')
+    
+      if (starRatingContainer) {
+        const stars = starRatingContainer.querySelectorAll('i')
+        const hiddenInput = document.getElementById('id_score') // Our hidden form field
+    
+        // Function to set the permanent 'selected' class
+        function setRating(value) {
+          stars.forEach((star) => {
+            if (star.dataset.value <= value) {
+              star.classList.add('selected')
+            } else {
+              star.classList.remove('selected')
+            }
+          })
+        }
+    
+        starRatingContainer.addEventListener('mouseout', function () {
+          // On mouse out, reset stars to the currently clicked value
+          let selectedValue = hiddenInput.value
+          setRating(selectedValue)
+        })
+    
+        stars.forEach((star) => {
+          star.addEventListener('mouseover', function () {
+            // Temporarily light up stars on hover
+            let hoverValue = this.dataset.value
+            stars.forEach((s) => {
+              if (s.dataset.value <= hoverValue) {
+                s.classList.add('selected')
+              } else {
+                s.classList.remove('selected')
+              }
+            })
+          })
+    
+          star.addEventListener('click', function () {
+            // On click, set the hidden input's value and set the rating
+            let clickedValue = this.dataset.value
+            hiddenInput.value = clickedValue
+            setRating(clickedValue)
+          })
+        })
+      }
+    })
+  </script>
+{% endblock %}

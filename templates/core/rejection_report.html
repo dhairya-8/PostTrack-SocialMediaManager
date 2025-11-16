@@ -1,0 +1,159 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  Rejection Report | PostTrack
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Rejection Report</h4>
+           <div class="page-title-right">
+              <div class="d-flex align-items-center">
+                
+                <form method="POST" class="me-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary waves-effect waves-light">
+                        <i class="bx bxs-download me-1"></i> Download CSV
+                    </button>
+                </form>
+                <ol class="breadcrumb m-0">
+                  <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                  <li class="breadcrumb-item"><a href="#">Reports</a></li>
+                  <li class="breadcrumb-item active">Rejection Report</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mini-stats-wid">
+            <div class="card-body">
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <p class="text-muted fw-medium">Total Rejected Posts</p>
+                  <h4 class="mb-0">{{ total_rejected_count }}</h4>
+                </div>
+                <div class="flex-shrink-0 align-self-center">
+                  <div class="mini-stat-icon avatar-sm rounded-circle bg-danger">
+                    <span class="avatar-title"><i class="bx bx-task-x font-size-24"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card mini-stats-wid">
+            <div class="card-body">
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <p class="text-muted fw-medium">Overall Rejection Rate</p>
+                  <h4 class="mb-0">{{ overall_rejection_rate|floatformat:1 }}%</h4>
+                </div>
+                <div class="flex-shrink-0 align-self-center">
+                  <div class="mini-stat-icon avatar-sm rounded-circle bg-warning">
+                    <span class="avatar-title"><i class="bx bx-line-chart-down font-size-24"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Most Rejected Posts</h4>
+              <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="align-middle">Post Title</th>
+                      <th class="align-middle">Client</th>
+                      <th class="align-middle">Rejections</th>
+                      <th class="align-middle">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for post in most_rejected_posts %}
+                    <tr>
+                      <td>{{ post.title }}</td>
+                      <td>{{ post.assigned_client.company_name }}</td>
+                      <td>
+                        <span class="badge badge-soft-danger font-size-12">{{ post.rejection_count }}</span>
+                      </td>
+                      <td>
+                        <a href="{% url 'posts:edit_post' post.id %}" class="btn btn-primary btn-sm btn-rounded">
+                          Review
+                        </a>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center">
+                        <p class="text-muted my-2">No rejected posts found.</p>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Clients by Rejection Rate</h4>
+              <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="align-middle">Client</th>
+                      <th class="align-middle">Rejection Rate</th>
+                      <th class="align-middle">Rejected / Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for client in clients_by_rejection %}
+                    <tr>
+                      <td>{{ client.company_name }}</td>
+                      <td>
+                        <h5 class="mb-0">{{ client.rejection_rate|floatformat:1 }}%</h5>
+                      </td>
+                      <td>
+                        {{ client.rejected_posts }} / {{ client.total_posts }}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="3" class="text-center">
+                        <p class="text-muted my-2">No client data available.</p>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_script %}
+  {% endblock %}

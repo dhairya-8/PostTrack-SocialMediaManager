@@ -1,0 +1,268 @@
+{% extends 'core/base_client.html' %}
+{% load static %}
+
+{% block title %}Pending Approval{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body p-3"> 
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-0">
+                    <h4 class="font-size-22 fw-bold">Pending Approval</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="{% url 'core:client_dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Pending Approval</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Posts Awaiting Your Review</h4>
+            </div>
+            <div class="card-body">
+                {% if pending_posts %}
+                <div class="list-group">
+                    {% for post in pending_posts %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" class="rounded me-3" width="80" height="80" style="object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <h5 class="font-size-15 mb-1">{{ post.title }}</h5>
+                                <p class="text-muted mb-1">{{ post.caption|truncatewords:20 }}</p>
+                                <small class="text-muted">
+                                    <i class="bx bx-calendar me-1"></i>
+                                    Scheduled for: {{ post.scheduled_datetime|date:"M d, Y" }}
+                                </small>
+                            </div>
+                            <div class="ms-3">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal{{ post.id }}">
+                                    Review
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="avatar-md mx-auto mb-4">
+                        <div class="avatar-title rounded-circle bg-success-subtle text-success">
+                            <i class="bx bx-check-circle font-size-24"></i>
+                        </div>
+                    </div>
+                    <h5 class="mt-3">All Caught Up! 🎉</h5>
+                    <p class="text-muted">You have no posts pending approval.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} 
+=====================================================
+  PREMIUM POST REVIEW MODAL - REDESIGNED
+=====================================================
+{% endcomment %}
+{% for post in pending_posts %}
+<div class="modal fade" id="postModal{{ post.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <div class="row g-0">
+
+                    <!-- LEFT: Image Section -->
+                    <div class="col-lg-7 position-relative" style="background: linear-gradient(135deg, #d4d3d2ff 0%, #9e9793ff 100%); min-height: 600px;">
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-4">
+                            <img src="{{ post.image.url }}" 
+                                 alt="{{ post.title }}" 
+                                 class="img-fluid rounded-3 shadow-lg" 
+                                 style="max-height: 85vh; max-width: 100%; object-fit: contain;">
+                        </div>
+                        
+                        <!-- Close Button - Floating -->
+                        <button type="button" 
+                                class="btn-close btn-close-white position-absolute top-0 end-0 m-4 p-2 bg-dark bg-opacity-50 rounded-circle" 
+                                data-bs-dismiss="modal" 
+                                aria-label="Close"
+                                style="width: 40px; height: 40px;">
+                        </button>
+                    </div>
+
+                    <!-- RIGHT: Content Section -->
+                    <div class="col-lg-5 d-flex flex-column bg-white">
+                        
+                        <!-- Header -->
+                        <div class="p-4 border-bottom">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="position-relative">
+                                    <img src="https://ui-avatars.com/api/?name={{ post.assigned_client.company_name|first }}&background=9e9793ff&color=fff&size=128&bold=true" 
+                                         alt="profile" 
+                                         class="rounded-circle shadow-sm" 
+                                         width="48" 
+                                         height="48" />
+                                    <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" 
+                                          style="width: 14px; height: 14px;"></span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold text-capitalize" style="font-size: 15px; letter-spacing: 0.3px;">
+                                        {{ post.assigned_client.company_name }}
+                                    </h6>
+                                    <small class="text-muted" style="font-size: 12px;">
+                                        <i class='bx bx-time-five align-middle'></i> Pending Review
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Area - Scrollable -->
+                        <div class="flex-grow-1 p-4" style="overflow-y: auto; max-height: calc(85vh - 200px);">
+                            
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label class="text-uppercase text-muted mb-2" style="font-size: 11px; font-weight: 600; letter-spacing: 1px;">
+                                    Post Title
+                                </label>
+                                <h4 class="fw-bold mb-0" style="font-size: 20px; line-height: 1.4; color: #1a202c;">
+                                    {{ post.title }}
+                                </h4>
+                            </div>
+
+                            <!-- Caption -->
+                            <div class="mb-4">
+                                <label class="text-uppercase text-muted mb-2" style="font-size: 11px; font-weight: 600; letter-spacing: 1px;">
+                                    Caption
+                                </label>
+                                <div class="p-3 rounded-3" style="background-color: #f7fafc; line-height: 1.7;">
+                                    <p class="mb-0" style="color: #4a5568; white-space: pre-wrap;">{{ post.caption }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Schedule Info -->
+                            <div class="mb-4">
+                                <label class="text-uppercase text-muted mb-2" style="font-size: 11px; font-weight: 600; letter-spacing: 1px;">
+                                    Scheduled For
+                                </label>
+                                <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+                                    <div class="d-flex align-items-center justify-content-center rounded-circle" 
+                                         style="width: 44px; height: 44px; background: linear-gradient(135deg, #d4d3d2ff 0%, #9e9793ff 100%);">
+                                        <i class='bx bx-calendar text-white' style="font-size: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold" style="color: #1a202c; font-size: 15px;">
+                                            {{ post.scheduled_datetime|date:"F d, Y" }}
+                                        </div>
+                                        <small class="text-muted" style="font-size: 13px;">
+                                            {{ post.scheduled_datetime|date:"l" }} at {{ post.scheduled_datetime|date:"g:i A" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Feedback Form -->
+                            <form action="{% url 'posts:client_review_post' %}" method="POST" id="reviewForm-{{ post.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="post_id" value="{{ post.id }}" />
+                                
+                                <div class="mb-3">
+                                    <label for="comments-{{ post.id }}" class="text-uppercase text-muted mb-2" style="font-size: 11px; font-weight: 600; letter-spacing: 1px;">
+                                        <i class='bx bx-message-dots align-middle'></i> Your Feedback
+                                    </label>
+                                    <textarea class="form-control border-2" 
+                                              id="comments-{{ post.id }}" 
+                                              name="comment" 
+                                              rows="4" 
+                                              placeholder="Share your thoughts, suggestions, or request specific changes..."
+                                              style="resize: none; font-size: 14px; border-color: #e2e8f0; border-radius: 10px; padding: 14px;">
+                                    </textarea>
+                                    <small class="text-muted mt-1 d-block" style="font-size: 12px;">
+                                        Optional: Leave this blank if you're happy with everything
+                                    </small>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="p-4 border-top" style="background-color: #fafbfc;">
+                            <div class="d-flex gap-3">
+                                <button type="submit" 
+                                        form="reviewForm-{{ post.id }}" 
+                                        name="action" 
+                                        value="reject" 
+                                        class="btn flex-fill py-3 fw-semibold position-relative overflow-hidden"
+                                        style="background-color: #fff; color: #dc3545; border: 2px solid #dc3545; border-radius: 10px; font-size: 14px; letter-spacing: 0.3px; transition: all 0.3s ease;"
+                                        onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='#fff';"
+                                        onmouseout="this.style.backgroundColor='#fff'; this.style.color='#dc3545';">
+                                    <i class='bx bx-revision me-2' style="font-size: 18px;"></i>
+                                    Request Changes
+                                </button>
+                                <button type="submit" 
+                                        form="reviewForm-{{ post.id }}" 
+                                        name="action" 
+                                        value="approve" 
+                                        class="btn flex-fill py-3 fw-semibold"
+                                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 10px; font-size: 14px; letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)';"
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
+                                    <i class='bx bx-check-double me-2' style="font-size: 18px;"></i>
+                                    Approve Post
+                                </button>
+                            </div>
+                            <p class="text-center text-muted mt-3 mb-0" style="font-size: 11px;">
+                                <i class='bx bx-info-circle'></i> Your decision will be saved instantly
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+/* Custom scrollbar for modal content */
+.modal-body [style*="overflow-y: auto"]::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body [style*="overflow-y: auto"]::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-body [style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+.modal-body [style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Smooth modal animation */
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+</style>
+
+
+{% endblock %}

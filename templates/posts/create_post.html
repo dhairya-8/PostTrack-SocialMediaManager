@@ -1,0 +1,198 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  Create New Post | PostTrack
+{% endblock %}
+
+{% block css %}
+  {{ block.super }} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  
+  <style>
+    /* This styles the preview container on the right */
+    .image-preview-wrapper {
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      background-color: #f8f9fa;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #image-preview-container {
+      display: none; /* Hidden by default */
+      max-width: 100%; /* Fill the column */
+      margin-top: 1rem;
+    }
+    #image-preview {
+      width: 100%;
+      height: auto;
+      max-height: 400px; /* Limit preview height */
+      object-fit: contain;
+      border-radius: 8px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Create New Post</h4>
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'posts:admin_request_list' %}">Post Requests</a></li>
+                <li class="breadcrumb-item active">Create New</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              
+              {% if post_request %}
+                <h4 class="card-title mb-4">Creating Post for: <span class="text-primary">{{ client_profile.company_name }}</span></h4>
+                <p class="text-muted">Creating from request ID #{{ post_request.id }}</p>
+              {% else %}
+                <h4 class="card-title mb-4">Post Details</h4>
+              {% endif %}
+
+              <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if post_request %}
+                  <input type="hidden" name="post_request_id" value="{{ post_request.id }}">
+                  <input type="hidden" name="assigned_client" value="{{ form.assigned_client.value }}">
+                {% endif %}
+
+                <div class="row">
+                  
+                  <div class="col-lg-7">
+                    {% if not post_request %}
+                      <div class="mb-3">
+                        <label for="{{ form.assigned_client.id_for_label }}" class="form-label">{{ form.assigned_client.label }}</label>
+                        {{ form.assigned_client }}
+                        {% if form.assigned_client.errors %}
+                            <div class="invalid-feedback d-block">{{ form.assigned_client.errors.0 }}</div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                      <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                      {{ form.title }}
+                      {% if form.title.errors %}
+                          <div class="invalid-feedback d-block">{{ form.title.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="{{ form.caption.id_for_label }}" class="form-label">{{ form.caption.label }}</label>
+                      {{ form.caption }}
+                      {% if form.caption.errors %}
+                          <div class="invalid-feedback d-block">{{ form.caption.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label for="{{ form.scheduled_datetime.id_for_label }}" class="form-label">{{ form.scheduled_datetime.label }}</label>
+                      {{ form.scheduled_datetime }}
+                      {% if form.scheduled_datetime.errors %}
+                          <div class="invalid-feedback d-block">{{ form.scheduled_datetime.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
+                      {{ form.image }}
+                      {% if form.image.errors %}
+                          <div class="invalid-feedback d-block">{{ form.image.errors.0 }}</div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="mt-4">
+                      <button type="submit" class="btn btn-primary w-md">Create Draft</button>
+                      <a href="{% url 'posts:admin_request_list' %}" class="btn btn-light w-md">Cancel</a>
+                    </div>
+                  </div>
+                  <div class="col-lg-5">
+                    <div class="image-preview-wrapper">
+                      <i class="bx bx-image-add display-4 text-muted"></i>
+                      <h6 class="text-muted mt-2">Image Preview</h6>
+                      <div id="image-preview-container">
+                        <img src="#" id="image-preview" alt="Image preview" />
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </form>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block page_script %}
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- Modern Date-time Picker ---
+        flatpickr('[data-toggle="flatpickr"]', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "F j, Y at h:i K",
+            minuteIncrement: 1,
+        });
+
+        // --- Image Preview ---
+        const imageInput = document.getElementById('id_image_input');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('image-preview');
+        const previewWrapper = document.querySelector('.image-preview-wrapper'); // The dashed box
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.setAttribute('src', e.target.result);
+                        previewContainer.style.display = 'block'; // Show the preview image
+                        
+                        // Hide the placeholder text/icon
+                        previewWrapper.querySelector('i').style.display = 'none';
+                        previewWrapper.querySelector('h6').style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.style.display = 'none'; // Hide if no file
+                    previewImage.setAttribute('src', '#');
+
+                    // Show the placeholder text/icon
+                    previewWrapper.querySelector('i').style.display = 'block';
+                    previewWrapper.querySelector('h6').style.display = 'block';
+                }
+            });
+        }
+    });
+  </script>
+{% endblock %}

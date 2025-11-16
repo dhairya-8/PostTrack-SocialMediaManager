@@ -1,0 +1,144 @@
+{% comment %}core/base_admin.html{% endcomment %}
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesbrand" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}" />
+
+    <!-- Css's links -->
+    {% block css %}
+      <!-- Bootstrap Css -->
+      <link href="{% static 'admin/assets/css/bootstrap.min.css' %}" id="bootstrap-style" rel="stylesheet" type="text/css" />
+      <!-- Icons Css -->
+      <link href="{% static 'admin/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+      <!-- App Css -->
+      <link href="{% static 'admin/assets/css/app.min.css' %}" id="app-style" rel="stylesheet" type="text/css" />   
+      <!-- preloader Css -->
+      <link href="{% static 'admin/assets/css/preloader.css' %}" id="app-style" rel="stylesheet" type="text/css" />
+    {% endblock %}
+  </head>
+
+  <body data-sidebar="dark" data-layout-mode="light">
+
+    <!-- Loader -->
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- <body data-layout="horizontal" data-topbar="dark"> -->
+
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+      <!-- Header Start --> 
+      {% include 'core/header_admin.html' %}
+      <!-- Header End -->
+
+      <!-- ========== Left Sidebar Start ========== -->
+      {% include 'core/sidebar.html' %}
+      <!-- Left Sidebar End -->
+
+      <!-- ============================================================== -->
+      <!-- Start right Content here -->
+      {% block content %}
+
+      {% endblock %}
+      <!-- ============================================================== -->
+
+      <!-- end main content -->
+    </div>
+    <!-- END layout-wrapper -->
+
+    <!-- Right Sidebar -->
+
+    <!-- /Right-bar -->
+
+    <!-- Right bar overlay -->
+    <div class="rightbar-overlay"></div>
+
+    <!-- JAVASCRIPT -->
+    {% block script %}
+<script src="{% static 'admin/assets/libs/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'admin/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'admin/assets/libs/metismenu/metisMenu.min.js' %}"></script>
+<script src="{% static 'admin/assets/libs/simplebar/simplebar.min.js' %}"></script>
+<script src="{% static 'admin/assets/libs/node-waves/waves.min.js' %}"></script>
+
+<script src="{% static 'admin/assets/libs/apexcharts/apexcharts.min.js' %}"></script>
+<script src="{% static 'admin/assets/js/pages/dashboard.init.js' %}"></script>
+
+<script src="{% static 'admin/assets/js/app.js' %}"></script>
+<script src="{% static 'admin/assets/js/preloader.js' %}"></script>
+    {% endblock %}
+
+    {% block page_script %}
+    {% endblock %}
+
+    <!-- Alerts -->
+    {% include 'core/alerts.html' %}
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function fetchNotifications() {
+            // Use the 'core' namespace
+            fetch("{% url 'core:get_unread' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const countBadge = document.getElementById('notification-count');
+                    countBadge.innerText = data.count;
+                    if (data.count > 0) {
+                        countBadge.style.display = 'inline-block';
+                    } else {
+                        countBadge.style.display = 'none';
+                    }
+
+                    const listElement = document.getElementById('notification-list');
+                    if (data.notifications.length > 0) {
+                        listElement.innerHTML = ''; // Clear the list
+                        data.notifications.forEach(notif => {
+                            // Use the 'core' namespace
+                            let notifLink = `{% url 'core:mark_as_read' 0 %}`.replace('0', notif.id);
+
+                            let itemHtml = `
+                            <a href="${notifLink}" class="text-reset notification-item">
+                                <div class="d-flex">
+                                    <div class="avatar-xs me-3">
+                                        <span class="avatar-title bg-primary rounded-circle font-size-16">
+                                            <i class="bx bxs-bell"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">${notif.message}</h6>
+                                        <div class="font-size-12 text-muted">
+                                            <p class="mb-0"><i class="mdi mdi-clock-outline"></i> ${notif.time}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>`;
+                            listElement.innerHTML += itemHtml;
+                        });
+                    } else {
+                        listElement.innerHTML = '<p class="text-center text-muted p-3">No new notifications</p>';
+                    }
+                })
+                .catch(error => console.error('Error fetching notifications:', error));
+        }
+        fetchNotifications();
+    });
+    </script>
+
+    
+     </body>
+</html>
+</html>

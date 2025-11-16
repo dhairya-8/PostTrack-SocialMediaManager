@@ -1,0 +1,70 @@
+{% comment %} templates/core/base_client_auth.html {% endcomment %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Auth{% endblock %} | PostTrack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'admin/assets/css/bootstrap.min.css' %}" id="bootstrap-style" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/app.min.css' %}" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="{% static 'client/client_theme.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/preloader.css' %}" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="bg-light">
+
+    <!-- Loader -->
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="account-pages my-5 pt-sm-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card overflow-hidden">
+                        <div class="bg-primary bg-soft">
+                            <div class="row">
+                                <div class="col-7">
+                                    <div class="text-primary p-4">
+                                        <h5 class="text-primary">Welcome to PostTrack</h5>
+                                        <p>Social media, simplified.</p>
+                                    </div>
+                                </div>
+                                <div class="col-5 align-self-end">
+                                    <img src="{% static 'admin/assets/images/profile-img.png' %}" alt="" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0"> 
+                            <div class="auth-logo">
+                                <a href="{% url 'core:client_login' %}" class="auth-logo-dark">
+                                    <div class="avatar-md profile-user-wid mb-4">
+                                        <span class="avatar-title rounded-circle">
+                                            <img src="{% static 'admin/assets/images/logo.png' %}" alt="" class="rounded-circle" height="75">
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="p-2">
+                                {% block card_content %}
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'admin/assets/libs/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'admin/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'admin/assets/js/app.js' %}"></script>
+    <script src="{% static 'admin/assets/js/preloader.js' %}"></script>
+
+        <!-- Alerts -->
+    {% include 'core/alerts.html' %}
+    
+</body>
+</html>

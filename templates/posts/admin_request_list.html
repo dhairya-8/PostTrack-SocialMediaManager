@@ -1,0 +1,120 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  Post Requests | PostTrack
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">All Post Requests</h4>
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Post Requests</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              
+              <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'ALL' %}active{% endif %}" href="{% url 'posts:admin_request_list' %}?status=ALL">
+                    All <span class="badge rounded-pill bg-light text-dark">{{ status_counts.ALL }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'PENDING' %}active{% endif %}" href="{% url 'posts:admin_request_list' %}?status=PENDING">
+                    Pending <span class="badge rounded-pill bg-warning text-dark">{{ status_counts.PENDING }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'VIEWED' %}active{% endif %}" href="{% url 'posts:admin_request_list' %}?status=VIEWED">
+                    Viewed <span class="badge rounded-pill bg-info">{{ status_counts.VIEWED }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'COMPLETED' %}active{% endif %}" href="{% url 'posts:admin_request_list' %}?status=COMPLETED">
+                    Completed <span class="badge rounded-pill bg-success">{{ status_counts.COMPLETED }}</span>
+                  </a>
+                </li>
+              </ul>
+              
+<div class="table-responsive mt-4">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Client</th>
+                <th scope="col" style="width: 40%;">Request Details</th>
+                <th scope="col">Status</th>
+                <th scope="col">Desired Date</th>
+                <th scope="col">Submitted</th>
+                
+                {% if request.user.role == 'ADMIN' %}
+                    <th scope="col">Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td>{{ req.client.company_name }}</td>
+                <td>
+                    <p class="mb-0" title="{{ req.request_details }}">{{ req.request_details|truncatewords:20 }}</p>
+                </td>
+                <td>
+                    {% if req.status == 'PENDING' %}
+                        <span class="badge badge-soft-warning">Pending</span>
+                    {% elif req.status == 'VIEWED' %}
+                        <span class="badge badge-soft-info">Viewed</span>
+                    {% elif req.status == 'COMPLETED' %}
+                        <span class="badge badge-soft-success">Completed</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.desired_date|date:"M d, Y"|default:"N/A" }}</td>
+                <td>{{ req.created_at|timesince }} ago</td>
+                
+                {% if request.user.role == 'ADMIN' %}
+                    <td>
+                        {% if req.status != 'COMPLETED' %}
+                            <a href="{% url 'posts:create_post' %}?request_id={{ req.id }}" class="btn btn-primary btn-sm btn-rounded" title="Create a post from this request">
+                                Create Post
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Done</span>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{% if request.user.role == 'ADMIN' %}6{% else %}5{% endif %}" class="text-center">
+                    <p class="text-muted my-3">No post requests found for this filter.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}

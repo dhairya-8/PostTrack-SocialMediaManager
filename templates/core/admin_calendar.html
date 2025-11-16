@@ -1,0 +1,90 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  Content Calendar | PostTrack
+{% endblock %}
+
+{% block css %}
+  {{ block.super }} <link href="{% static 'admin/assets/libs/@fullcalendar/core/main.min.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'admin/assets/libs/@fullcalendar/daygrid/main.min.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'admin/assets/libs/@fullcalendar/bootstrap/main.min.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'admin/assets/libs/@fullcalendar/timegrid/main.min.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block content %}
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+              <h4 class="mb-sm-0 font-size-18">Content Calendar</h4>
+              <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                  <li class="breadcrumb-item">
+                    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+                  </li>
+                  <li class="breadcrumb-item active">Calendar</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div id="calendar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_script %}
+  <script src="{% static 'admin/assets/libs/moment/min/moment.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/jquery-ui-dist/jquery-ui.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/@fullcalendar/core/main.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/@fullcalendar/bootstrap/main.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/@fullcalendar/daygrid/main.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/@fullcalendar/timegrid/main.min.js' %}"></script>
+  <script src="{% static 'admin/assets/libs/@fullcalendar/interaction/main.min.js' %}"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      
+      // Get the event data from our Django view
+      var calendarEvents = {{ calendar_events_json|safe }};
+
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        // --- THIS IS THE CRITICAL PART ---
+        // We must tell FullCalendar which plugins to use
+        plugins: [ 'dayGrid', 'timeGrid', 'bootstrap', 'interaction' ],
+        
+        themeSystem: 'bootstrap', // Use the Bootstrap theme
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        editable: false, 
+        eventLimit: true,
+        events: calendarEvents,
+        
+        eventClick: function(info) {
+          info.jsEvent.preventDefault(); // don't let the browser follow the link
+          if (info.event.url) {
+            window.location.href = info.event.url; // Go to the post's edit page
+          }
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+{% endblock %}

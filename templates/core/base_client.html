@@ -1,0 +1,192 @@
+{% comment %} templates/core/base_client.html (NEW MINIMALIST) {% endcomment %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Client Dashboard{% endblock %} | PostTrack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="{% static 'admin/assets/images/favicon.ico' %}" />
+
+    <link href="{% static 'admin/assets/css/bootstrap.min.css' %}" id="bootstrap-style" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/app.min.css' %}" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="{% static 'admin/assets/css/preloader.css' %}" rel="stylesheet" type="text/css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link href="{% static 'client/client_theme.css' %}" rel="stylesheet" type="text/css" />
+
+    {% block css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Loader -->
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="layout-wrapper">
+        <header id="page-topbar">
+            <nav class="navbar navbar-expand-lg navbar-light app-header">
+                <div class="container-fluid">
+                    <a class="navbar-brand ms-5" href="{% url 'core:client_dashboard' %}">
+                        <img src="{% static 'admin/assets/images/logo.png' %}" alt="PostTrack" height="60" />
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#clientNavbar" aria-controls="clientNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="clientNavbar">
+                        <ul class="navbar-nav navbar-nav-centered mx-auto mb-2 mb-lg-0 text-center">
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'client_dashboard' %}active{% endif %}" href="{% url 'core:client_dashboard' %}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'client_feed' %}active{% endif %}" href="{% url 'core:client_feed' %}">Feed</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'client_calendar' %}active{% endif %}" href="{% url 'core:client_calendar' %}">Calendar</a>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex align-items-center ms-auto">
+                            <span class="navbar-text d-none d-lg-block me-3">
+                                Welcome, <strong>{{ request.user.client_profile.company_name }}</strong>
+                            </span>
+
+                            <div class="dropdown d-inline-block">
+                                <button type="button" class="btn btn-ghost-secondary rounded-circle" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bx bx-bell fs-4"></i>
+                                    <span class="badge bg-danger rounded-pill" id="notification-count" style="display: none; position: absolute; top: 10px; right: 0;">0</span>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
+                                    <div class="p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="m-0"> Notifications </h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div data-simplebar style="max-height: 230px;" id="notification-list">
+                                        <p class="text-center text-muted p-3">No new notifications</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown d-inline-block ms-2">
+                                <button type="button" class="btn header-item" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img class="rounded-circle header-profile-user" src="{% static 'admin/assets/images/default_pic.png' %}" alt="Header Avatar" style="width: 36px; height: 36px;" />
+                                    <span class="d-none d-xl-inline-block ms-1 fw-medium">{{ request.user.username }}</span>
+                                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="dropdown-item" href="{% url 'core:client_profile' %}">
+                                        <i class="bx bx-user font-size-16 align-middle me-1"></i> Profile
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <form action="{% url 'core:client_logout' %}" method="POST" class="d-flex m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; width: 100%; text-align: inherit;">
+                                            <i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <div class="main-content" style="margin-left: 0; margin-top: 25px;">
+            <div class="page-content">
+                <div class="container-fluid">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            <footer class="footer" style="left: 0;">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <script>document.write(new Date().getFullYear())</script> © PostTrack.
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end d-none d-sm-block">
+                                Client Portal
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{% static 'admin/assets/libs/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'admin/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'admin/assets/libs/simplebar/simplebar.min.js' %}"></script>
+    <script src="{% static 'admin/assets/js/preloader.js' %}"></script>
+
+    {% block script %}{% endblock %}
+
+    <!-- Alerts -->
+    {% include 'core/alerts.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simplebar (for notification dropdown)
+            if (document.getElementById('notification-list')) {
+                new SimpleBar(document.getElementById('notification-list'));
+            }
+
+            // Fetch Notifications
+            function fetchNotifications() {
+                fetch("{% url 'core:get_unread' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        const countBadge = document.getElementById('notification-count');
+                        countBadge.innerText = data.count;
+                        if (data.count > 0) {
+                            countBadge.style.display = 'block';
+                        } else {
+                            countBadge.style.display = 'none';
+                        }
+
+                        const listElement = document.getElementById('notification-list');
+                        if (data.notifications.length > 0) {
+                            listElement.innerHTML = ''; // Clear the list
+                            data.notifications.forEach(notif => {
+                                let notifLink = `{% url 'core:mark_as_read' 0 %}`.replace('0', notif.id);
+                                let itemHtml = `
+                                    <a href="${notifLink}" class="text-reset notification-item">
+                                        <div class="d-flex">
+                                            <div class="avatar-xs me-3">
+                                                <span class="avatar-title bg-primary rounded-circle font-size-16">
+                                                    <i class="bx bxs-bell"></i>
+                                                </span>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">${notif.message}</h6>
+                                                <div class="font-size-12 text-muted">
+                                                    <p class="mb-0"><i class="mdi mdi-clock-outline"></i> ${notif.time}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>`;
+                                listElement.innerHTML += itemHtml;
+                            });
+                        } else {
+                            listElement.innerHTML = '<p class="text-center text-muted p-3">No new notifications</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching notifications:', error));
+            }
+            fetchNotifications();
+        });
+    </script>
+</body>
+</html>

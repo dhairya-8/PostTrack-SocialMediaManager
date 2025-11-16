@@ -1,0 +1,168 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+
+{% block title %}
+  All Posts | PostTrack
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+      
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">All Posts</h4>
+            <div class="page-title-right">
+              <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Posts</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              
+              <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'ALL' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=ALL">
+                    All <span class="badge rounded-pill bg-light text-dark">{{ status_counts.ALL }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'DRAFT' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=DRAFT">
+                    Draft <span class="badge rounded-pill bg-secondary">{{ status_counts.DRAFT }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'PENDING' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=PENDING">
+                    Pending <span class="badge rounded-pill bg-warning text-dark">{{ status_counts.PENDING }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'REJECTED' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=REJECTED">
+                    Rejected <span class="badge rounded-pill bg-danger">{{ status_counts.REJECTED }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'APPROVED' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=APPROVED">
+                    Approved <span class="badge rounded-pill bg-success">{{ status_counts.APPROVED }}</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if current_status == 'PUBLISHED' %}active{% endif %}" href="{% url 'posts:post_list' %}?status=PUBLISHED">
+                    Published <span class="badge rounded-pill bg-primary">{{ status_counts.PUBLISHED }}</span>
+                  </a>
+                </li>
+              </ul>
+              
+              <div class="table-responsive mt-4">
+                <table class="table table-hover align-middle table-nowrap">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col">Title</th>
+                      <th scope="col">Client</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Scheduled For</th>
+                      <th scope="col">Last Updated</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for post in posts %}
+                    <tr>
+                      <td>
+                        <h6 class="mb-0">{{ post.title }}</h6>
+                        <p class="text-muted mb-0">{{ post.caption|truncatewords:8 }}</p>
+                      </td>
+                      <td>{{ post.assigned_client.company_name }}</td>
+                      <td>
+                        {% if post.status == 'DRAFT' %}
+                          <span class="badge badge-soft-secondary">Draft</span>
+                        {% elif post.status == 'PENDING' %}
+                          <span class="badge badge-soft-warning">Pending</span>
+                        {% elif post.status == 'REJECTED' %}
+                          <span class="badge badge-soft-danger">Rejected</span>
+                        {% elif post.status == 'APPROVED' %}
+                          <span class="badge badge-soft-success">Approved</span>
+                        {% elif post.status == 'PUBLISHED' %}
+                          <span class="badge badge-soft-primary">Published</span>
+                        {% else %}
+                          <span class="badge badge-soft-dark">{{ post.get_status_display }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ post.scheduled_datetime|date:"M d, Y" }}</td>
+                      <td>{{ post.updated_at|timesince }} ago</td>
+<td>
+  <!-- View button (common for both roles) -->
+  <a href="{% url 'posts:view_post' post.id %}" class="btn btn-info btn-sm btn-rounded me-2">
+    <i class="bx bx-show"></i> View
+  </a>
+
+  {% if request.user.role == 'ADMIN' %}
+    {% if post.status == 'DRAFT' %}
+      <!-- Edit Button -->
+      <a href="{% url 'posts:edit_post' post.id %}" class="btn btn-primary btn-sm btn-rounded me-2">
+        <i class="bx bx-edit"></i> Edit
+      </a>
+
+      <!-- Mark as Done Button -->
+      <form method="POST" action="{% url 'posts:mark_post_pending' post.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-warning btn-sm btn-rounded me-2"
+                onclick="return confirm('Mark this post as done and ready for client review?');">
+          <i class="bx bx-check-circle"></i> Mark as Done
+        </button>
+      </form>
+
+    {% elif post.status != 'APPROVED' and post.status != 'PUBLISHED' %}
+      <!-- Edit Button -->
+      <a href="{% url 'posts:edit_post' post.id %}" class="btn btn-primary btn-sm btn-rounded me-2">
+        <i class="bx bx-edit"></i> Edit
+      </a>
+    {% else %}
+      <!-- Disabled Edit -->
+      <button class="btn btn-outline-secondary btn-sm btn-rounded me-2" disabled>
+        <i class="bx bx-edit"></i> Edit
+      </button>
+    {% endif %}
+
+    <!-- Delete Button -->
+    <form method="POST" action="{% url 'posts:delete_post' post.id %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm btn-rounded"
+              onclick="return confirm('Are you sure you want to delete this post?');">
+        <i class="bx bx-trash"></i> Delete
+      </button>
+    </form>
+  {% endif %}
+</td>
+
+
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="6" class="text-center">
+                        <p class="text-muted my-3">No posts found for this filter.</p>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+  </div>
+</div>
+{% endblock %}

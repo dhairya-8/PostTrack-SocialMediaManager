@@ -1,0 +1,229 @@
+{% extends 'core/base_admin.html' %}
+{% load static %}
+{% block title %}Dashboard | PostTrack{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+
+      <!-- Page Title -->
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Dashboard</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Welcome Card -->
+        <div class="col-xl-4">
+          <div class="card overflow-hidden">
+            <div class="bg-primary bg-soft">
+              <div class="row">
+                <div class="col-7">
+                  <div class="text-primary p-3">
+                    <h5 class="text-primary">Welcome Back!</h5>
+                    <p>{{ request.user.get_role_display }} — {{ request.user.username }}</p>
+                  </div>
+                </div>
+                <div class="col-5 align-self-end">
+                  <img src="{% static 'admin/assets/images/profile-img.png' %}" alt="" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="card-body pt-0"></div>
+          </div>
+
+          <!-- Feedback (Admins Only) -->
+          {% if request.user.role == 'ADMIN' %}
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Recent Client Feedback</h4>
+              <ul class="verti-timeline list-unstyled">
+                {% for fb in recent_feedback %}
+                <li class="event-list">
+                  <div class="event-timeline-dot"><i class="bx bxs-comment-dots font-size-18"></i></div>
+                  <div class="d-flex">
+                    <div class="flex-grow-1">
+                      <div>
+                        <strong>{{ fb.user.username }}</strong> on "{{ fb.post.title }}"
+                        <p class="text-muted mb-0 fst-italic">"{{ fb.comment|truncatewords:10 }}"</p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                {% empty %}
+                <li class="event-list">
+                  <div class="d-flex">
+                    <div class="flex-grow-1">
+                      <p class="text-muted">No recent feedback.</p>
+                    </div>
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="col-xl-8">
+
+          <!-- Common Stats -->
+          <div class="row">
+            <div class="col-md-4">
+              <div class="card mini-stats-wid">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <p class="text-muted fw-medium">Pending Approval</p>
+                    <h4 class="mb-0">{{ pending_count }}</h4>
+                  </div>
+                  <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
+                    <span class="avatar-title"><i class="bx bx-time-five font-size-24"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card mini-stats-wid">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <p class="text-muted fw-medium">Rejected</p>
+                    <h4 class="mb-0">{{ rejected_count }}</h4>
+                  </div>
+                  <div class="mini-stat-icon avatar-sm rounded-circle bg-danger">
+                    <span class="avatar-title"><i class="bx bx-task-x font-size-24"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card mini-stats-wid">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div>
+                    <p class="text-muted fw-medium">Approved</p>
+                    <h4 class="mb-0">{{ approved_count }}</h4>
+                  </div>
+                  <div class="mini-stat-icon avatar-sm rounded-circle bg-success">
+                    <span class="avatar-title"><i class="bx bx-check-shield font-size-24"></i></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conditional Section -->
+          {% if request.user.role == 'ADMIN' %}
+          <!-- Admins: Rejected Posts to Fix -->
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Posts Needing Attention (Rejected)</h4>
+              <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Post Title</th>
+                      <th>Client</th>
+                      <th>Last Feedback</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for post in rejected_posts %}
+                    <tr>
+                      <td>{{ post.title }}</td>
+                      <td>{{ post.assigned_client.company_name }}</td>
+                      <td>
+                        {% with post.feedback.all|first as latest_feedback %}
+                        {% if latest_feedback %}
+                        <span class="fst-italic text-danger">"{{ latest_feedback.comment|truncatewords:8 }}"</span>
+                        {% else %}
+                        <span class="text-muted">No comment left.</span>
+                        {% endif %}
+                        {% endwith %}
+                      </td>
+                      <td>
+                        <a href="{% url 'posts:edit_post' post.id %}" class="btn btn-primary btn-sm btn-rounded">
+                          Edit & Resubmit
+                        </a>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center">
+                        <p class="text-muted my-2">No posts need attention. Great job!</p>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {% elif request.user.role == 'SUPER_ADMIN' %}
+          <!-- Super Admins: Platform Overview -->
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title mb-4">Platform Overview</h4>
+              <div class="row text-center">
+                <div class="col-md-3">
+                  <h5 class="text-primary">{{ total_posts }}</h5>
+                  <p class="text-muted mb-0">Total Posts</p>
+                </div>
+                <div class="col-md-3">
+                  <h5 class="text-success">{{ total_clients }}</h5>
+                  <p class="text-muted mb-0">Clients</p>
+                </div>
+                <div class="col-md-3">
+                  <h5 class="text-info">{{ total_admins }}</h5>
+                  <p class="text-muted mb-0">Admins</p>
+                </div>
+                <div class="col-md-3">
+                  <h5 class="text-warning">{{ published_posts }}</h5>
+                  <p class="text-muted mb-0">Published Posts</p>
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div id="postStatusChart" style="height: 280px;"></div>
+            </div>
+          </div>
+
+          <script src="{% static 'admin/assets/libs/apexcharts/apexcharts.min.js' %}"></script>
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              var options = {
+                chart: { type: 'donut', height: 280 },
+                labels: ['Draft', 'Pending', 'Approved', 'Rejected', 'Published'],
+                series: [
+                  {{ draft_count }}, 
+                  {{ pending_count }}, 
+                  {{ approved_count }}, 
+                  {{ rejected_count }}, 
+                  {{ published_count }}
+                ],
+                colors: ['#adb5bd', '#f1b44c', '#34c38f', '#f46a6a', '#556ee6'],
+                legend: { position: 'bottom' }
+              };
+              var chart = new ApexCharts(document.querySelector("#postStatusChart"), options);
+              chart.render();
+            });
+          </script>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_script %}
+<script src="{% static 'admin/assets/js/pages/dashboard.init.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'core/base_client.html' %}
+{% load static %}
+
+{% block title %}Your Profile | PostTrack{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-0">
+                    <h4 class="font-size-22 fw-bold mb-0">Account Settings</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="{% url 'core:client_dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Profile</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'core/alerts.html' %}
+
+<div class="row">
+    <!-- Profile Info Card -->
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0">
+                <h5 class="mb-0"><i class="bx bx-user-circle me-2 text-primary"></i>Profile Details</h5>
+            </div>
+            <div class="card-body pt-0">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control bg-light" value="{{ request.user.username }}" readonly>
+                        <small class="text-muted fst-italic">This field cannot be changed.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <input type="email" class="form-control bg-light" value="{{ request.user.email }}" readonly>
+                        <input type="hidden" name="email" value="{{ profile_form.email.value }}">
+                        <small class="text-muted fst-italic">This field cannot be changed.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
+                        {{ profile_form.first_name }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
+                        {{ profile_form.last_name }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.company_name.id_for_label }}" class="form-label fw-semibold">Company Name</label>
+                        {{ profile_form.company_name }}
+                        {% if profile_form.company_name.errors %}
+                            <div class="text-danger small mt-1">{{ profile_form.company_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.phone_number.id_for_label }}" class="form-label fw-semibold">Phone Number</label>
+                        {{ profile_form.phone_number }}
+                        {% if profile_form.phone_number.errors %}
+                            <div class="text-danger small mt-1">{{ profile_form.phone_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ profile_form.theme.id_for_label }}" class="form-label fw-semibold">Preferred Theme</label>
+                        {{ profile_form.theme }}
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary px-4" name="update_profile">
+                        <i class="bx bx-save me-1"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Card -->
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0">
+                <h5 class="mb-0"><i class="bx bx-lock-alt me-2 text-primary"></i>Change Password</h5>
+            </div>
+            <div class="card-body pt-0">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ password_form.old_password.id_for_label }}" class="form-label fw-semibold">Current Password</label>
+                        {{ password_form.old_password }}
+                        {% if password_form.old_password.errors %}
+                            <div class="text-danger small mt-1">{{ password_form.old_password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ password_form.new_password1.id_for_label }}" class="form-label fw-semibold">New Password</label>
+                        {{ password_form.new_password1 }}
+                        {% if password_form.new_password1.errors %}
+                            <div class="text-danger small mt-1">{{ password_form.new_password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ password_form.new_password2.id_for_label }}" class="form-label fw-semibold">Confirm New Password</label>
+                        {{ password_form.new_password2 }}
+                        {% if password_form.new_password2.errors %}
+                            <div class="text-danger small mt-1">{{ password_form.new_password2.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary px-4" name="change_password">
+                        <i class="bx bx-key me-1"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

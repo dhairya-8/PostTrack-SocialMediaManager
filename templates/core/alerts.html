@@ -1,0 +1,140 @@
+{% if messages %}
+<style>
+  /* ===== Premium Alert Styling (PostTrack) ===== */
+  .custom-alerts-container {
+    position: fixed;
+    top: 25px;
+    right: 35px; /* ✅ adds subtle padding from right edge */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 1050;
+    pointer-events: none; /* doesn't block clicks behind */
+  }
+
+  .custom-alert {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateX(40px);
+    transition: all 0.5s ease;
+    pointer-events: auto;
+  }
+
+  .custom-alert.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ===== COLOR THEMES ===== */
+  .custom-alert.success {
+    background: linear-gradient(135deg, #00b09b, #96c93d);
+  }
+
+  .custom-alert.error {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  }
+
+  .custom-alert.info {
+    background: linear-gradient(135deg, #2193b0, #6dd5ed);
+  }
+
+  /* ===== ICONS ===== */
+  .alert-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    opacity: 0.95;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Using Unicode icons for simplicity — premium feel */
+  .custom-alert.success .alert-icon::before {
+    content: "✔";
+  }
+
+  .custom-alert.error .alert-icon::before {
+    content: "✖";
+  }
+
+  .custom-alert.info .alert-icon::before {
+    content: "ℹ";
+  }
+
+  /* ===== MESSAGE ===== */
+  .alert-message {
+    flex: 1;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+  }
+
+  /* ===== CLOSE BUTTON ===== */
+  .alert-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
+  }
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  /* ===== FADE OUT ANIMATION ===== */
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+  }
+</style>
+
+<div class="custom-alerts-container">
+  {% for message in messages %}
+    <div class="custom-alert {{ message.tags }}">
+      <span class="alert-icon"></span>
+      <span class="alert-message">{{ message }}</span>
+      <button class="alert-close">&times;</button>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const alerts = document.querySelectorAll(".custom-alert");
+
+    alerts.forEach((alert, index) => {
+      // Staggered appearance for smooth stacking
+      setTimeout(() => alert.classList.add("show"), index * 150);
+
+      // Auto-dismiss after 4 seconds
+      setTimeout(() => {
+        alert.style.animation = "fadeOut 0.5s forwards";
+        setTimeout(() => alert.remove(), 500);
+      }, 4000 + index * 200);
+
+      // Manual close
+      const closeBtn = alert.querySelector(".alert-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          alert.style.animation = "fadeOut 0.4s forwards";
+          setTimeout(() => alert.remove(), 400);
+        });
+      }
+    });
+  });
+</script>
+{% endif %}

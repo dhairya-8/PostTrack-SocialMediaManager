@@ -1,0 +1,222 @@
+
+  /* =========================================
+     Base font + warm, subtle design tokens
+     ========================================= */
+:root {
+  --bs-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Palette 4: Warm Blush & Stone */
+  --warm-bg: #fbf8f6;            /* A warm, rosy off-white background */
+  --warm-surface: #ffffff;       /* Pure white cards */
+  --warm-header: #faf6f3;        /* A subtle, warm header */
+  --warm-border: #edebe9;         /* A soft, warm-grey border */
+  --warm-text: #5a524e;           /* Main text: a deep, warm stone-grey */
+  --warm-muted: #978f8a;        /* Muted text: a lighter stone-grey */
+  --warm-accent: #e2b8a8;         /* The Accent: a pastel, dusty terracotta/blush */
+  --warm-accent-strong: #d9a897;  /* A darker blush for hover */
+  --warm-accent-light: #faf3f0;  /* A very light, warm peachy wash */
+  --warm-ink-soft: #a9a19c;      /* Even softer muted text */
+
+  --shadow-sm: 0 3px 12px rgba(90, 82, 78, 0.06);
+  --shadow-md: 0 10px 24px rgba(90, 82, 78, 0.1);
+  --focus-ring: 0 0 0 3px rgba(226, 184, 168, 0.3);
+}
+
+  /* ===== App background & type ===== */
+  body {
+    background: var(--warm-bg);
+    color: var(--warm-text);
+    font-family: var(--bs-font-sans-serif);
+  }
+
+  /* =========================================
+     Header — separated, warm, subtle
+     ========================================= */
+  #page-topbar,
+  .navbar.app-header,
+  .navbar {
+    background: var(--warm-header) !important;
+    border-bottom: 1px solid var(--warm-border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: var(--warm-accent) !important;
+    letter-spacing: .2px;
+  }
+
+  .navbar .nav-link {
+    font-weight: 500;
+    color: var(--warm-muted) !important;
+    border-radius: 8px;
+    padding: 0.55rem 0.95rem;
+  }
+  .navbar .nav-link.active,
+  .navbar .nav-link:hover {
+    color: var(--warm-accent) !important;
+    background-color: var(--warm-accent-light) !important;
+  }
+
+  @media (min-width: 992px) { /* center nav on large screens */
+    .navbar-nav-centered {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Give content some breathing room below header */
+  .main-content { margin-top: 20px; }
+
+  /* =========================================
+     Cards & structural elements
+     ========================================= */
+  .card {
+    border-radius: 12px;
+    border: 1px solid var(--warm-border);
+    box-shadow: var(--shadow-sm);
+    background: var(--warm-surface);
+  }
+  .card-header {
+    background-color: var(--warm-surface);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--warm-text);
+    border-bottom: 1px solid var(--warm-border);
+  }
+
+  /* Softer text */
+  .text-muted { color: var(--warm-muted) !important; }
+
+  /* =========================================
+     Buttons — warm & friendly
+     ========================================= */
+  .btn-warm {
+    background: var(--warm-accent-light);
+    color: var(--warm-accent);
+    border: 1px solid var(--warm-border);
+    font-weight: 500;
+    border-radius: 10px;
+  }
+  .btn-warm:hover { background: #f2dcc2; }
+
+  .btn-warm-accent {
+    background: var(--warm-accent);
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+  }
+  .btn-warm-accent:hover { background: var(--warm-accent-strong); }
+
+  /* Badge used in your header (notification count) — keep gentle */
+  .badge.bg-danger {
+    background-color: #f3d9d1 !important;
+    color: #8a3b2e !important;
+  }
+
+  /* =========================================
+     Avatars & small elements
+     ========================================= */
+  .avatar-title {
+    background: var(--warm-accent-light) !important;
+    color: var(--warm-accent) !important;
+  }
+
+  /* =========================================
+     Post feed (cards grid)
+     ========================================= */
+  .post-feed-card {
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .post-feed-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .post-feed-image-wrapper {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+    background-color: #f4ede7; /* warm beige */
+  }
+  .post-feed-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+  .post-feed-card:hover .post-feed-image-wrapper img {
+    transform: scale(1.05);
+  }
+  .post-feed-card .card-body { padding: 1.1rem; }
+  .post-feed-card .card-title { font-weight: 600; color: var(--warm-text); }
+  .post-feed-card .card-text {
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 2.7rem;
+    color: var(--warm-ink-soft);
+  }
+  .post-feed-card .card-footer {
+    background-color: var(--warm-surface);
+    border-top: 1px solid var(--warm-border);
+  }
+
+  /* =========================================
+     Post detail + comments
+     ========================================= */
+  .post-detail-header { display: flex; align-items: center; }
+  .post-detail-header img {
+    width: 44px; height: 44px; border-radius: 50%; margin-right: 1rem;
+  }
+  .post-detail-header h5 { font-weight: 600; font-size: 1.05rem; margin-bottom: 0; }
+  .post-detail-caption { font-size: 1rem; line-height: 1.6; margin: 1.2rem 0 1.5rem; }
+
+  .comment-feed { max-height: 250px; }
+  .comment-item { display: flex; margin-bottom: 1.1rem; }
+  .comment-item-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background-color: var(--warm-accent-light);
+    color: var(--warm-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; flex-shrink: 0; margin-right: 0.75rem;
+  }
+  .comment-item-body { font-size: 0.92rem; }
+  .comment-item-body strong { font-weight: 600; color: var(--warm-text); }
+  .comment-item-body p { margin-bottom: 0; color: var(--warm-muted); }
+
+  /* =========================================
+     Star rating (warm amber)
+     ========================================= */
+  .js-star-rating { font-size: 1.6rem; cursor: pointer; }
+  .js-star-rating i {
+    color: #d8c9bb;              /* empty star */
+    transition: color 0.12s ease-in-out;
+    margin-right: 4px;
+  }
+  .js-star-rating i.selected { color: #e0a455; }   /* warm amber */
+  .js-star-rating:hover i { color: #e0a455; }
+  .js-star-rating i:hover ~ i { color: #d8c9bb; }
+
+  /* =========================================
+     Footer
+     ========================================= */
+  .footer {
+    background: var(--warm-header);
+    border-top: 1px solid var(--warm-border);
+  }
+
+  /* =========================================
+     Accessible but soft focus rings
+     ========================================= */
+  :is(a, button, .form-control, .btn):focus {
+    outline: none !important;
+    box-shadow: var(--focus-ring) !important;
+  }
